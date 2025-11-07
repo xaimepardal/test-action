@@ -6,34 +6,29 @@ on:
     branches: [main]
 
 permissions:
-  contents: write   # para pushear tags y crear releases
+  contents: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # necesario para tags
+          fetch-depth: 0
 
-      # Bumpea versión, actualiza CHANGELOG.md y crea tag según commits
       - name: Commitizen bump
         id: cz
         uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          push: true              # pushea el tag y el CHANGELOG al repo
-          changelog_incremental: true
+          push: true          # pushea tag y cambios de versión
+          changelog: true     # actualiza/genera CHANGELOG.md
 
-      # Obtén el tag nuevo (fallback si la acción no lo expone)
       - name: Detect tag
         id: tag
-        run: |
-          echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
-      # Crea el GitHub Release usando el changelog generado
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
